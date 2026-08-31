@@ -71,6 +71,8 @@ namespace MyAspNetCoreHiveMQ.Controllers
             return name switch
             {
                 "temperature" or "temp" => "temperature",
+                "soil_humid" or "soilhumid" or "soil_humidity" or "soil_moisture" or "soilmoisture" => "humidity",
+                "air_humid" or "airhumid" or "air_humidity" => "air_humidity",
                 "humidity" or "hum" => "humidity",
                 _ => null
             };

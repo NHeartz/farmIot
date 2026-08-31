@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyAspNetCoreHiveMQ")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b4c9dc8beb03f098c22edd133c048154e80db2b7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff2bf6f338b8869b1d5895f5ea61004d795077d4")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyAspNetCoreHiveMQ")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyAspNetCoreHiveMQ")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
