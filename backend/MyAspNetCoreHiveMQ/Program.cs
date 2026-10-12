@@ -10,9 +10,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 var listenUrls = builder.Configuration["Urls"] ?? "http://0.0.0.0:5000;https://0.0.0.0:5001";
 builder.WebHost.UseUrls(listenUrls);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MinRequestBodyDataRate = null;
+    options.Limits.MinResponseDataRate = null;
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ISensorService, SensorService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddSingleton<HiveMqttService>();
+builder.Services.AddSingleton<IMqttCommandPublisher>(serviceProvider =>
+    serviceProvider.GetRequiredService<HiveMqttService>());
+builder.Services.AddHostedService<HiveMqttService>(serviceProvider =>
+    serviceProvider.GetRequiredService<HiveMqttService>());
+builder.Services.AddHostedService<WateringQueueWorker>();
 
 var supabaseUrl = builder.Configuration["Supabase:Url"];
 var supabaseKey = builder.Configuration["Supabase:ServiceRoleKey"]
@@ -34,8 +48,6 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-builder.Services.AddHostedService<HiveMqttService>();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -53,7 +65,8 @@ app.UseCors("Frontend");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
+    await db.Database.EnsureCreatedAsync();
+    await WateringSchema.EnsureCreatedAsync(db);
 }
 
 app.MapControllers();

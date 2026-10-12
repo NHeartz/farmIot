@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import Sidebar, { type Plot } from '../../components/Sidebar/Sidebar'
+import type { Plot } from '../../components/Sidebar/Sidebar'
 import SensorChart from '../../components/SensorChart/SensorChart'
 import '../../App.css'
 
@@ -35,9 +35,9 @@ const normalizeCameraKey = (value: string | null | undefined) => {
   return cleaned
 }
 
-type Props = { plot: Plot; plots: Plot[]; onSelectPlot: (plot: Plot) => void; onLogout: () => void }
+type Props = { plot: Plot; onBack: () => void; onLogout: () => void }
 
-export default function PlotDashboard({ plot, plots, onSelectPlot, onLogout }: Props) {
+export default function PlotDashboard({ plot, onBack, onLogout }: Props) {
   const [data, setData] = useState<ApiData | null>(null)
   const [live, setLive] = useState(false)
   const [cameraImages, setCameraImages] = useState<Record<string, CameraImage | null>>({})
@@ -115,12 +115,15 @@ export default function PlotDashboard({ plot, plots, onSelectPlot, onLogout }: P
 
   const temperaturePoints = data?.history.temperature ?? []
   const humidityPoints = data?.history.humidity ?? []
+  const soilPhPoints = data?.history.soil_ph ?? []
   const temperature = data?.latest.temperature ?? { value: 0, createdAt: new Date().toISOString() }
   const humidity = data?.latest.humidity ?? { value: 0, createdAt: new Date().toISOString() }
+  const soilPh = data?.latest.soil_ph
+  const waterFlow = data?.latest.water_flow
+  const waterIsFlowing = waterFlow !== undefined && waterFlow.value > 0 && isFreshReading(waterFlow)
 
   return (
     <div className="app-shell">
-      <Sidebar plots={plots} selectedPlotId={plot.id} onSelectPlot={onSelectPlot} onLogout={onLogout} />
       <main className="main-content">
         <header className="topbar">
           <div>
@@ -129,7 +132,11 @@ export default function PlotDashboard({ plot, plots, onSelectPlot, onLogout }: P
               แปลง {plot.id} <em>—</em> {plot.crop}
             </h1>
           </div>
-          <span className="location">⌖ โซน A · ทิศเหนือ · 200 ตร.ม.</span>
+          <div className="topbar-actions">
+            <span className="location">⌖ โซน A · ทิศเหนือ · 200 ตร.ม.</span>
+            <button className="back-button" type="button" onClick={onBack}>← เลือกแปลง</button>
+            <button className="logout-button" type="button" onClick={onLogout}>ออกจากระบบ</button>
+          </div>
         </header>
 
         <div className="content">
@@ -189,23 +196,23 @@ export default function PlotDashboard({ plot, plots, onSelectPlot, onLogout }: P
             <section className="panel water-card">
               <div className="panel-heading">
                 <div>
-                  <span className="eyebrow">WATER TANK</span>
-                  <h2>น้ำวันนี้</h2>
+                  <span className="eyebrow">WATER FLOW</span>
+                  <h2>อัตราการไหลของน้ำ</h2>
                 </div>
                 <span className="icon blue">≋</span>
               </div>
               <div className="big-number">
-                12.4
-                <small>ลิตร</small>
+                {waterFlow ? waterFlow.value.toFixed(1) : '--'}
+                <small>ลิตร/นาที</small>
               </div>
-              <span className="muted-copy">ไม่มีการไหลของน้ำ</span>
-              <b className="mock-chip">MOCKUP</b>
+              <span className="muted-copy">{waterIsFlowing ? 'กำลังมีการไหลของน้ำ' : 'ไม่มีการไหลของน้ำ'}</span>
             </section>
           </div>
 
           <div className="chart-stack">
             <SensorChart title="อุณหภูมิ" unit="°C" color="#d96a3d" points={temperaturePoints} latest={temperature} />
             <SensorChart title="ความชื้นดิน" unit="%" color="#2e8b57" points={humidityPoints} latest={humidity} />
+            <SensorChart title="ค่า pH ดิน" unit="pH" color="#7b61a8" points={soilPhPoints} latest={soilPh} />
           </div>
 
           <section className="panel camera-panel">

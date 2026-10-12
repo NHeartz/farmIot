@@ -22,7 +22,7 @@ function App() {
 
   if (page === 'login') return <LoginPage onLogin={login} />
   if (page === 'plots') return <PlotSelectionPage userName={userName} plots={userPlots} onSelect={selectPlot} onLogout={logout} />
-  return selectedPlot ? <PlotDashboard plot={selectedPlot} plots={userPlots} onSelectPlot={selectPlot} onLogout={logout} /> : <PlotSelectionPage userName={userName} plots={userPlots} onSelect={selectPlot} onLogout={logout} />
+  return selectedPlot ? <PlotDashboard plot={selectedPlot} onBack={() => setPage('plots')} onLogout={logout} /> : <PlotSelectionPage userName={userName} plots={userPlots} onSelect={selectPlot} onLogout={logout} />
 }
 
 export default App
