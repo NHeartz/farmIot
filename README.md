@@ -10,16 +10,7 @@
 
 ## Backend
 
-กำหนดค่าการเชื่อมต่อผ่าน environment variables ก่อนรัน backend โดยไม่ใส่ credentials ลงในไฟล์ที่ commit:
-
-```powershell
-$env:ConnectionStrings__DefaultConnection = "<PostgreSQL connection string>"
-$env:HiveMQ__Broker = "<MQTT broker>"
-$env:HiveMQ__Username = "<MQTT username>"
-$env:HiveMQ__Password = "<MQTT password>"
-```
-
-ถ้าต้องใช้ Supabase service role ให้กำหนด `$env:Supabase__ServiceRoleKey` เพิ่มเติม
+ตั้งค่า connection string และ credentials ที่ `backend/MyAspNetCoreHiveMQ/appsettings.json` ก่อนรัน backend
 
 ```powershell
 dotnet run --project .\backend\MyAspNetCoreHiveMQ\MyAspNetCoreHiveMQ.csproj

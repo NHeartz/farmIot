@@ -3,9 +3,16 @@ using MyAspNetCoreHiveMQ.Data;
 
 namespace MyAspNetCoreHiveMQ.Services;
 
-public static class WateringSchema
+public sealed class WateringSchema : IWateringSchemaService
 {
-    public static async Task EnsureCreatedAsync(ApplicationDbContext db, CancellationToken cancellationToken = default)
+    private readonly ApplicationDbContext _db;
+
+    public WateringSchema(ApplicationDbContext db)
+    {
+        _db = db;
+    }
+
+    public async Task EnsureCreatedAsync(CancellationToken cancellationToken = default)
     {
         const string sql = """
             CREATE TABLE IF NOT EXISTS watering_jobs (
@@ -90,6 +97,6 @@ public static class WateringSchema
             );
             """;
 
-        await db.Database.ExecuteSqlRawAsync(sql, cancellationToken);
+        await _db.Database.ExecuteSqlRawAsync(sql, cancellationToken);
     }
 }

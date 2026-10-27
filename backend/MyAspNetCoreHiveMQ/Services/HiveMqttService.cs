@@ -120,8 +120,8 @@ public sealed class HiveMqttService : BackgroundService, IMqttCommandPublisher
 
         if (parts[2].Equals("soil_humid", StringComparison.OrdinalIgnoreCase))
         {
-            await AutomaticWatering.EnqueueIfNeededAsync(
-                context, parts[1], sensorValue, CancellationToken.None);
+            var wateringQueue = scope.ServiceProvider.GetRequiredService<IWateringQueueService>();
+            await wateringQueue.EnqueueIfNeededAsync(parts[1], sensorValue, CancellationToken.None);
         }
     }
 

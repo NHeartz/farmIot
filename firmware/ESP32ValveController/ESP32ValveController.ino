@@ -334,15 +334,18 @@ void readAndPublishSensors(uint32_t now) {
 }
 
 void setup() {
+  // Hold an active-low relay OFF as early as possible during startup.
+  // INPUT_PULLUP biases GPIO14 high before switching it to output mode.
+  pinMode(RELAY_PIN, INPUT_PULLUP);
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+
   Serial.begin(115200);
 
   // --- เพิ่ม: เริ่มต้นเชื่อมต่อ Serial2 สำหรับ RS485 ---
   Serial2.begin(4800, SERIAL_8N1, RX2_PIN, TX2_PIN);
   node.begin(1, Serial2);
-
-  // Set the output latch to OFF before configuring the pin as an output.
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-  pinMode(RELAY_PIN, OUTPUT);
 
   dht.begin();
   analogReadResolution(12);

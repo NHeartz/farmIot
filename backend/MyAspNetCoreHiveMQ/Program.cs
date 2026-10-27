@@ -20,6 +20,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ISensorService, SensorService>();
+builder.Services.AddScoped<IWateringService, WateringService>();
+builder.Services.AddScoped<IWateringQueueService, WateringQueueService>();
+builder.Services.AddScoped<IWateringSchemaService, WateringSchema>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddSingleton<HiveMqttService>();
 builder.Services.AddSingleton<IMqttCommandPublisher>(serviceProvider =>
@@ -29,8 +32,11 @@ builder.Services.AddHostedService<HiveMqttService>(serviceProvider =>
 builder.Services.AddHostedService<WateringQueueWorker>();
 
 var supabaseUrl = builder.Configuration["Supabase:Url"];
-var supabaseKey = builder.Configuration["Supabase:ServiceRoleKey"]
-    ?? builder.Configuration["Supabase:Key"];
+var supabaseKey = builder.Configuration["Supabase:ServiceRoleKey"];
+if (string.IsNullOrWhiteSpace(supabaseKey))
+{
+    supabaseKey = builder.Configuration["Supabase:Key"];
+}
 
 if (!string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseKey))
 {
@@ -66,7 +72,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.EnsureCreatedAsync();
-    await WateringSchema.EnsureCreatedAsync(db);
+    var wateringSchema = scope.ServiceProvider.GetRequiredService<IWateringSchemaService>();
+    await wateringSchema.EnsureCreatedAsync();
 }
 
 app.MapControllers();
